@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎮 משחק כבלים - Digital Connections Lab</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            direction: rtl;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* רקע דינמי עם חלקיקים */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.3) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .container {
+            position: relative;
+            z-index: 2;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* כותרת ראשית */
+        .main-header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 25px;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .main-title {
+            font-size: 3.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            background: linear-gradient(45deg, #FFD700, #FFA500);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .main-subtitle {
+            font-size: 1.3em;
+            opacity: 0.9;
+            margin-bottom: 20px;
+        }
+
+        .game-description {
+            font-size: 1.1em;
+            line-height: 1.6;
+            max-width: 800px;
+            margin: 0 auto;
+            opacity: 0.95;
+        }
+
+        /* סטטיסטיקות */
+        .stats-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 20px;
+            padding: 25px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #FFD700;
+            display: block;
+        }
+
+        .stat-label {
+            color: white;
+            font-size: 1.1em;
+            margin-top: 10px;
+        }
+
+        /* הסבר על המשחק */
+        .game-info {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 25px;
+            padding: 30px;
+            margin-bottom: 40px;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .info-title {
+            color: #FFD700;
+            font-size: 2em;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .info-content {
+            color: white;
+            font-size: 1.1em;
+            line-height: 1.7;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 25px;
+        }
+
+        .info-item {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 15px;
+            padding: 20px;
+            border-left: 4px solid #FFD700;
+        }
+
+        .info-item h3 {
+            color: #FFD700;
+            margin-bottom: 10px;
+            font-size: 1.3em;
+        }
+
+        .info-item p {
+            color: white;
+            opacity: 0.9;
+        }
+
+        /* גרסאות המשחק */
+        .versions-section {
+            margin-bottom: 40px;
+        }
+
+        .versions-title {
+            color: #FFD700;
+            font-size: 2.5em;
+            text-align: center;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .versions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+        }
+
+        .version-card {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 20px;
+            padding: 25px;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .version-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: left 0.5s;
+        }
+
+        .version-card:hover::before {
+            left: 100%;
+        }
+
+        .version-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .version-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .version-icon {
+            font-size: 2.5em;
+            margin-left: 15px;
+        }
+
+        .version-title {
+            color: #FFD700;
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+
+        .version-description {
+            color: white;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .version-features {
+            list-style: none;
+            margin-bottom: 20px;
+        }
+
+        .version-features li {
+            color: white;
+            margin-bottom: 8px;
+            padding-right: 20px;
+            position: relative;
+        }
+
+        .version-features li::before {
+            content: '⚡';
+            position: absolute;
+            right: 0;
+            color: #FFD700;
+        }
+
+        .version-link {
+            display: inline-block;
+            background: linear-gradient(45deg, #FF6B6B, #EE5A24);
+            color: white;
+            padding: 12px 25px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .version-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+            border-color: #FFD700;
+        }
+
+        /* כפתור חזרה */
+        .back-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: bold;
+            z-index: 1000;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .back-btn:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+        }
+
+        /* אנימציות */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in {
+            animation: fadeInUp 0.6s ease forwards;
+        }
+
+        /* רספונסיביות */
+        @media (max-width: 768px) {
+            .main-title {
+                font-size: 2.5em;
+            }
+            
+            .versions-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-section {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .stats-section {
+                grid-template-columns: 1fr;
+            }
+            
+            .main-title {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="../index.html" class="back-btn">🏠 חזרה לדף הראשי</a>
+
+    <div class="container">
+        <!-- כותרת ראשית -->
+        <div class="main-header fade-in">
+            <h1 class="main-title">🎮 משחק כבלים</h1>
+            <p class="main-subtitle">Digital Connections Lab - מעבדת החיבורים הדיגיטלית</p>
+            <p class="game-description">
+                משחק חיבורים מתקדם שמפתח חשיבה לוגית, זיכרון ומיומנויות פתרון בעיות. 
+                במשחק תצטרכו לחבר כבלים בצורה נכונה כדי להפעיל מכשירים שונים במעבדה.
+            </p>
+        </div>
+
+        <!-- סטטיסטיקות -->
+        <div class="stats-section fade-in">
+            <div class="stat-card">
+                <span class="stat-number">3</span>
+                <div class="stat-label">גרסאות משחק</div>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number">25+</span>
+                <div class="stat-label">רמות קושי</div>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number">100%</span>
+                <div class="stat-label">פונקציונליות</div>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number">🎯</span>
+                <div class="stat-label">פיתוח חשיבה</div>
+            </div>
+        </div>
+
+        <!-- הסבר על המשחק -->
+        <div class="game-info fade-in">
+            <h2 class="info-title">📖 איך משחקים?</h2>
+            <div class="info-content">
+                <p>
+                    משחק הכבלים הוא משחק חינוכי שמפתח חשיבה לוגית ומיומנויות פתרון בעיות. 
+                    במשחק תמצאו עצמכם במעבדה דיגיטלית עם מכשירים שונים שצריכים חיבור כבלים נכון כדי לעבוד.
+                </p>
+            </div>
+            
+            <div class="info-grid">
+                <div class="info-item">
+                    <h3>🎯 מטרת המשחק</h3>
+                    <p>חברו את כל הכבלים בצורה נכונה כדי להפעיל את כל המכשירים במעבדה. כל חיבור נכון יפתח מכשירים נוספים.</p>
+                </div>
+                
+                <div class="info-item">
+                    <h3>⚡ איך משחקים</h3>
+                    <p>לחצו על כבל ואז על נקודת החיבור הרצויה. המשחק יבדוק אם החיבור נכון ויציג משוב מיידי.</p>
+                </div>
+                
+                <div class="info-item">
+                    <h3>🏆 רמות קושי</h3>
+                    <p>המשחק כולל רמות קושי שונות - ממתחילים ועד מתקדמים. כל רמה מוסיפה אתגרים חדשים ומכשירים מורכבים יותר.</p>
+                </div>
+                
+                <div class="info-item">
+                    <h3>🧠 מיומנויות מפותחות</h3>
+                    <p>המשחק מפתח חשיבה לוגית, זיכרון, תכנון מראש, ומיומנויות פתרון בעיות מורכבות.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- גרסאות המשחק -->
+        <div class="versions-section fade-in">
+            <h2 class="versions-title">🔄 גרסאות המשחק</h2>
+            
+            <div class="versions-grid">
+                <!-- גרסה 1 - בסיסית -->
+                <div class="version-card" onclick="window.open('digital_connections_lab.html', '_blank')">
+                    <div class="version-header">
+                        <span class="version-icon">🔬</span>
+                        <h3 class="version-title">גרסה בסיסית</h3>
+                    </div>
+                    <p class="version-description">
+                        הגרסה הראשונה של המשחק עם ממשק פשוט וידידותי. מושלמת למתחילים!
+                    </p>
+                    <ul class="version-features">
+                        <li>ממשק משתמש פשוט</li>
+                        <li>5 רמות בסיסיות</li>
+                        <li>הוראות ברורות</li>
+                        <li>משוב מיידי</li>
+                    </ul>
+                    <a href="digital_connections_lab.html" class="version-link" target="_blank">שחק עכשיו</a>
+                </div>
+
+                <!-- גרסה 2 - מתקדמת -->
+                <div class="version-card" onclick="window.open('digital_connections_lab (1).html', '_blank')">
+                    <div class="version-header">
+                        <span class="version-icon">⚡</span>
+                        <h3 class="version-title">גרסה מתקדמת</h3>
+                    </div>
+                    <p class="version-description">
+                        גרסה משופרת עם אפקטים ויזואליים מתקדמים ורמות קושי נוספות.
+                    </p>
+                    <ul class="version-features">
+                        <li>אפקטים ויזואליים מתקדמים</li>
+                        <li>10 רמות קושי</li>
+                        <li>מערכת ניקוד</li>
+                        <li>אנימציות חלקות</li>
+                    </ul>
+                    <a href="digital_connections_lab (1).html" class="version-link" target="_blank">שחק עכשיו</a>
+                </div>
+
+                <!-- גרסה 3 - סופית -->
+                <div class="version-card" onclick="window.open('digital_connections_lab (2).html', '_blank')">
+                    <div class="version-header">
+                        <span class="version-icon">🏆</span>
+                        <h3 class="version-title">גרסה סופית</h3>
+                    </div>
+                    <p class="version-description">
+                        הגרסה המלאה והמתקדמת ביותר עם כל התכונות והאתגרים!
+                    </p>
+                    <ul class="version-features">
+                        <li>כל התכונות המתקדמות</li>
+                        <li>25+ רמות קושי</li>
+                        <li>מערכת הישגים</li>
+                        <li>מצב רב-משתתפים</li>
+                    </ul>
+                    <a href="digital_connections_lab (2).html" class="version-link" target="_blank">שחק עכשיו</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- מידע נוסף -->
+        <div class="game-info fade-in">
+            <h2 class="info-title">💡 טיפים למשחק</h2>
+            <div class="info-content">
+                <div class="info-grid">
+                    <div class="info-item">
+                        <h3>🎯 התחילו מהפשוט</h3>
+                        <p>התחילו עם החיבורים הפשוטים והברורים ביותר, ואז התקדמו למורכבים יותר.</p>
+                    </div>
+                    
+                    <div class="info-item">
+                        <h3>🧠 תכננו מראש</h3>
+                        <p>הסתכלו על כל המכשירים לפני שתתחילו לחבר. תכננו את סדר החיבורים.</p>
+                    </div>
+                    
+                    <div class="info-item">
+                        <h3>🔄 נסו שוב</h3>
+                        <p>אם חיבור לא עובד, נסו לחשוב על זה מזווית אחרת. לפעמים הפתרון לא ברור מיד.</p>
+                    </div>
+                    
+                    <div class="info-item">
+                        <h3>⏱️ קחו את הזמן</h3>
+                        <p>אל תמהרו! המשחק נועד לפיתוח חשיבה, לא למהירות. קחו את הזמן לחשוב.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // אנימציות כניסה
+        document.addEventListener('DOMContentLoaded', function() {
+            const elements = document.querySelectorAll('.fade-in');
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            });
+
+            elements.forEach(el => {
+                el.style.opacity = '0';
+                el.style.transform = 'translateY(30px)';
+                el.style.transition = 'all 0.6s ease';
+                observer.observe(el);
+            });
+        });
+
+        // אפקט hover לכרטיסי הגרסאות
+        document.querySelectorAll('.version-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-10px) scale(1.02)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0) scale(1)';
+            });
+        });
+
+        // אפקט לחיצה לכרטיסי הגרסאות
+        document.querySelectorAll('.version-card').forEach(card => {
+            card.addEventListener('click', function() {
+                this.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    this.style.transform = 'scale(1)';
+                }, 150);
+            });
+        });
+    </script>
+</body>
+</html> 
